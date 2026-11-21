@@ -1,40 +1,65 @@
 {
-    "name": "go-constant",
-    "description": "Declare constant properties with ease",
-    "author": "Michael Ko",
-    "email": "koyote130708@gmail.com",
-    "version": "1.1.0",
-    "license": "GNU LGPLv3",
-    "keywords": [
-        "constant",
-        "constant properties",
-        "read-only properties",
-        "named value"
-    ],
-    "homepage": "https://github.com/koyote130708/go-constant",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/koyote130708/go-constant.git"
-    },
-    "main": "index.js",
-    "scripts": {
-        "start": "node src\/.tmp\/test.js",
-        "build": "npm run bundle & npm run minify",
-        "bundle": "webpack build --mode=none --progress --entry ./index.js -o ./dist --output-filename go-constant.js --output-library-name=Constant --output-library-type=umd --output-global-object=this",
-        "minify": "uglifyjs ./dist/go-constant.js -c -m --source-map -o ./dist/go-constant.min.js",
-        "test": "mocha -u tdd test/*.js",
-        "coverage": "c8 --clean npm run test",
-        "docs": "documentation readme index.js --section=Documentation",
-        "docs:html": "documentation build index.js -f html -o docs"
-    },
-    "devDependencies": {
-        "c8": "^7.12.0",
-        "chai": "^4.3.6",
-        "documentation": "^14.0.0",
-        "mocha": "^10.0.0",
-        "uglify-js": "^3.17.3",
-        "webpack": "^5.74.0",
-        "webpack-cli": "^4.10.0"
-    },
-    "engine": "node >= 0.10"
+  "name": "go-constant",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Represent constants as objects with read-only values, define enums, and create reusable record types",
+  "license": "MIT",
+  "author": {
+    "name": "fishgoldworks",
+    "url": "https://github.com/fishgoldworks"
+  },
+  "keywords": [
+    "constant",
+    "constant properties",
+    "read-only properties",
+    "enum"
+  ],
+  "homepage": "https://github.com/fishgoldworks/go-constant",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fishgoldworks/go-constant.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fishgoldworks/go-constant/issues"
+  },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "docs": "node scripts/docs.js",
+    "pack:package": "node scripts/pack-package.js",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix --max-warnings 0",
+    "format": "node scripts/format.mjs",
+    "format:check": "prettier . --check",
+    "test": "node scripts/test.js",
+    "test:docs": "node scripts/docs.js --check && node --test test/docs/docs-generation.test.js test/docs/documentation-examples.test.js && node scripts/test-readme-types.js",
+    "test:types": "node scripts/test-types.js",
+    "test:build": "node --test test/build.test.js",
+    "test:tooling": "node --test test/tooling/benchmark.test.js test/tooling/browser-harness.test.js test/tooling/coverage-inventory.test.js test/tooling/eslint.config.test.js test/tooling/ignore-rules.test.js test/tooling/mutation-target.test.js test/tooling/readability.test.mjs test/tooling/test.test.js",
+    "test:artifacts": "node scripts/build.js --check && node --test test/artifacts.test.js",
+    "test:package": "node scripts/test-package.js",
+    "test:release": "node --test test/package/cleanup.test.js test/package/pack-package.test.js test/package/release.test.js test/package/verify.test.js",
+    "test:browser": "node scripts/test-browser.js",
+    "test:mutations": "node scripts/test-mutations.js",
+    "coverage": "node scripts/test.js --coverage",
+    "verify": "node scripts/verify.js",
+    "verify:all": "node scripts/verify.js --browser",
+    "benchmark": "node scripts/benchmark.js",
+    "prepack": "node scripts/root-package-guard.js",
+    "prepublishOnly": "node scripts/root-package-guard.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@stylistic/eslint-plugin": "5.10.0",
+    "eslint": "10.11.0",
+    "eslint-plugin-jsdoc": "63.3.3",
+    "globals": "16.5.0",
+    "playwright": "1.57.0",
+    "prettier": "3.9.6",
+    "terser": "5.51.2",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.70.1"
+  },
+  "overrides": {
+    "minimatch@<11.0.1": "11.0.4"
+  }
 }

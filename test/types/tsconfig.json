@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": false,
+    "types": []
+  },
+  "files": [
+    "commonjs.cts",
+    "esm.mts",
+    "defineEnum.mts",
+    "inference-regressions.cts",
+    "optional-options.cts",
+    "dynamic-schema.cts"
+  ]
+}

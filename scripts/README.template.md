@@ -1,0 +1,373 @@
+# Go Constant
+
+**Represent constants as objects with read-only values.**
+
+[![Source line coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](#development)
+[![Documentation](https://img.shields.io/badge/docs-{{DOCS_COVERAGE}}%25-{{DOCS_COLOUR}}.svg)](docs/API.md)
+
+- **Version:** [{{VERSION}}](CHANGELOG.md)
+- **Licence:** [{{LICENSE}}](LICENSE.md)
+
+Use [`Constant()`](docs/API.md#constantvalue-name) when you need to pass a constant around as an object. It stores the value in a read-only [`.value`](docs/API.md#instancevalue) field and accepts an optional display name. A `const` declaration prevents you from reassigning the variable. [`Constant()`](docs/API.md#constantvalue-name) prevents you from replacing its [`.value`](docs/API.md#instancevalue). Any object stored as the value keeps its original mutability.
+
+Use [`defineType()`](docs/API.md#definetypename-fields-options) to create reusable constructors for records with read-only fields and optional validation and normalisation. Use [`defineEnum()`](docs/API.md#defineenumdefinitions-name) to define a fixed set of named constants with optional metadata, value lookup and membership checks.
+
+No runtime dependencies. TypeScript declarations included.
+
+**[View full API documentation](docs/API.md)**
+
+## Contents
+
+{{TOC}}
+
+## Installation
+
+Using npm:
+
+```sh
+npm install go-constant
+```
+
+Using Yarn:
+
+```sh
+yarn add go-constant
+```
+
+### Runtime support
+
+<!-- prettier-ignore -->
+| Environment | Requirement |
+| --- | --- |
+| CommonJS | Node.js {{NODE_MIN_VERSION}} or later. |
+| ES modules | Native root and focused imports require Node.js 14.0.0 or later, or Node.js 12.17.0+ within 12.x. The CommonJS and ES module entry points share function identity. |
+| Browser and worker | Modern JavaScript with `Map`, `Set`, `Number.isFinite`, `Reflect.apply`, `Reflect.ownKeys`, `Object.create`, property descriptors, and `new.target`. The bundles are not ES5/Internet Explorer builds. |
+
+See [Development](#development) for contributor requirements.
+
+## Usage
+
+The default import `import Constant from 'go-constant'` gives you the same function as the named [`Constant`](docs/API.md#constantvalue-name) import.
+
+### ES modules
+
+<!-- prettier-ignore -->
+```javascript
+import { Constant, defineEnum } from "go-constant";
+
+const red = Constant("#FF0000", "Red");
+console.log(red.value);                                            // => "#FF0000"
+console.log(red.name);                                             // => "Red"
+
+const Status = defineEnum({ DRAFT: "draft", PUBLISHED: "published" }, "Status");
+console.log(Status.name);                                          // => "Status"
+console.log(Status.fromValue("published") === Status.PUBLISHED);   // => true
+```
+
+Both [`.value`](docs/API.md#instancevalue) and [`.name`](docs/API.md#instancename) are read-only.
+
+### CommonJS
+
+<!-- prettier-ignore -->
+```javascript
+const { Constant, defineEnum } = require("go-constant");
+
+const red = Constant("#FF0000", "Red");
+console.log(red.value);                                            // => "#FF0000"
+console.log(red.name);                                             // => "Red"
+
+const Status = defineEnum({ DRAFT: "draft", PUBLISHED: "published" }, "Status");
+console.log(Status.name);                                          // => "Status"
+console.log(Status.fromValue("published") === Status.PUBLISHED);   // => true
+```
+
+### Function subpaths
+
+Use a subpath to import [`Constant`](docs/API.md#constantvalue-name), [`defineType()`](docs/API.md#definetypename-fields-options), or [`defineEnum()`](docs/API.md#defineenumdefinitions-name) directly. Each subpath supports default and named ES module imports. In CommonJS, `require('go-constant/defineEnum')` returns the function directly.
+
+<!-- prettier-ignore -->
+```javascript
+import { defineEnum } from 'go-constant/defineEnum';
+
+const Status = defineEnum({ DRAFT: 'draft', PUBLISHED: 'published' }, 'Status');
+console.log(Status.name);                // => "Status"
+console.log(Status.hasValue('draft'));   // => true
+```
+
+Root and subpath imports share function and instance identity across CommonJS and ES modules. Separately loaded package copies and browser bundles have their own constructors.
+
+### Browser
+
+Both bundles expose [`goConstant`](docs/API.md#constantvalue-name) in browsers and workers.
+
+- [Minified bundle](https://cdn.jsdelivr.net/npm/{{NAME}}@{{VERSION}}/dist/go-constant.min.js)
+- [Readable bundle](https://cdn.jsdelivr.net/npm/{{NAME}}@{{VERSION}}/dist/go-constant.js)
+
+<!-- browser-distribution-example -->
+<!-- prettier-ignore -->
+```html
+<script src="https://cdn.jsdelivr.net/npm/{{NAME}}@{{VERSION}}/dist/go-constant.min.js"></script>
+<script>
+  const { Constant, defineEnum } = goConstant;
+
+  const red = Constant("#FF0000", "Red");
+  console.log(red.value);                                            // => "#FF0000"
+  console.log(red.name);                                             // => "Red"
+
+  const Status = defineEnum({ DRAFT: "draft", PUBLISHED: "published" }, "Status");
+  console.log(Status.name);                                          // => "Status"
+  console.log(Status.fromValue("published") === Status.PUBLISHED);   // => true
+</script>
+```
+
+Both bundles are self-contained UMD files with CommonJS and AMD support. Source maps and licence notices accompany both files. Neither bundle requires dynamic code generation (`eval` or `Function`). Worker scripts can load a bundle with `importScripts()` where that browser API is available.
+
+The bundles require the syntax and native APIs listed under [Runtime support](#runtime-support). Release checks run both bundles and this example in Chromium, Firefox and WebKit; they do not establish an older browser-version minimum. The package's `index.mjs` entry wraps CommonJS and requires a bundler for browser use.
+
+## Common tasks
+
+<!-- prettier-ignore -->
+| Task | API |
+| --- | --- |
+| [Store a read-only value](#store-a-read-only-value) | [`Constant()`](docs/API.md#constantvalue-name) |
+| [Define statuses and other fixed choices](#define-statuses-and-other-fixed-choices) | [`defineEnum()`](docs/API.md#defineenumdefinitions-name) |
+| [Create records with validated fields](#create-records-with-validated-fields) | [`defineType()`](docs/API.md#definetypename-fields-options) |
+| [Build an enum from records](#build-an-enum-from-records) | [`defineType()`](docs/API.md#definetypename-fields-options), [`defineEnum()`](docs/API.md#defineenumdefinitions-name) |
+| [List the records you create](#list-the-records-you-create) | [`getInstances()`](docs/API.md#mytypegetinstances) |
+
+### Store a read-only value
+
+Pass the wrapper to code that needs to read the default. Add a display name when a description is useful. `Reflect.set()` returns `false` when it cannot change the read-only field.
+
+<!-- prettier-ignore -->
+```javascript
+import { Constant } from "go-constant";
+
+const DEFAULT_PAGE_SIZE = Constant(25, "Default page size");
+Reflect.set(DEFAULT_PAGE_SIZE, "value", 50);   // => false
+DEFAULT_PAGE_SIZE.value;                       // => 25
+DEFAULT_PAGE_SIZE.name;                        // => "Default page size"
+```
+
+### Define statuses and other fixed choices
+
+Each [definition key](docs/API.md#myenumkey) names a member. Here, `Status.DRAFT` holds the stored value `"draft"` along with its label and other application metadata. Pass an optional name as the second argument when other code needs to identify the enum, such as in diagnostics.
+
+<!-- prettier-ignore -->
+```javascript
+import { defineEnum } from "go-constant";
+
+const Status = defineEnum({
+  DRAFT: { value: "draft", label: "Draft", editable: true },
+  PUBLISHED: { value: "published", label: "Published", editable: false },
+  ARCHIVED: { value: "archived", label: "Archived", editable: false }
+}, "Status");
+
+const status = Status.fromValue("published");
+const options = Status.members.map(({ value, label }) => ({ value, label }));
+const payload = { status: status.value };
+
+Status.name;                   // => "Status"
+status === Status.PUBLISHED;   // => true
+Status.hasValue("published");  // => true
+Status.fromValue("removed");   // => undefined
+options[0];                    // => { value: "draft", label: "Draft" }
+payload.status;                // => "published"
+```
+
+For simple settings, use a string or finite number as shorthand. The resulting member still has a [`.value`](docs/API.md#mymembervalue) field, so adding metadata later preserves the way callers access it.
+
+<!-- prettier-ignore -->
+```javascript
+import { defineEnum } from "go-constant";
+
+const Theme = defineEnum({ LIGHT: "light", DARK: "dark", SYSTEM: "system" });
+const theme = Theme.fromValue("sepia") || Theme.SYSTEM;
+
+Theme.DARK.value;              // => "dark"
+Theme.hasValue(Theme.DARK);    // => false
+Theme.hasValue("dark");        // => true
+theme.value;                   // => "system"
+```
+
+Persist [`.value`](docs/API.md#mymembervalue) and use [`fromValue()`](docs/API.md#myenumfromvalueinput) to restore the corresponding member.
+
+### Create records with validated fields
+
+Define the fields and a validator once. The constructor validates and normalises inputs before creating each record’s read-only fields.
+
+<!-- prettier-ignore -->
+```javascript
+import { defineType } from "go-constant";
+
+const Priority = defineType("Priority", ["code", "rank"], {
+  validate(code, rank) {
+    if (!Number.isFinite(rank)) throw new TypeError("rank must be finite");
+    return [String(code).trim().toLowerCase(), rank];
+  }
+});
+
+const urgent = Priority(" URGENT ", 30);
+urgent.code;                   // => "urgent"
+urgent.rank;                   // => 30
+Priority("urgent", NaN);       // => throws TypeError
+```
+
+### Build an enum from records
+
+An image editor can use [`defineType()`](docs/API.md#definetypename-fields-options) for arbitrary image dimensions. Its avatar exporter uses [`defineEnum()`](docs/API.md#defineenumdefinitions-name) to offer only two standard sizes.
+
+<!-- prettier-ignore -->
+```javascript
+import { defineEnum, defineType } from "go-constant";
+
+const ImageSize = defineType("ImageSize", ["value", "width", "height"]);
+
+function pixelCount(size) {
+  return size.width * size.height;
+}
+
+// The editor also supports custom sizes.
+const banner = ImageSize("banner", 1200, 300);
+const small = ImageSize("small", 64, 64);
+const large = ImageSize("large", 256, 256);
+
+// These presets are ImageSize instances. defineEnum() requires plain objects for expanded members.
+const AvatarSize = defineEnum({
+  SMALL: { ...small },
+  LARGE: { ...large }
+}, "AvatarSize");
+
+pixelCount(banner);                        // => 360000
+pixelCount(AvatarSize.fromValue("large")); // => 65536
+AvatarSize.hasValue(banner.value);         // => false
+```
+
+Spread each selected record to pass its fields as plain data. To keep the original record and its methods, store it in a metadata field. See [record identity and freezing](docs/API.md#enum-records-identity-and-freezing) for both forms.
+
+### List the records you create
+
+Set `trackInstances: true` in the options you pass to [`defineType()`](docs/API.md#definetypename-fields-options). Then call [`getInstances()`](docs/API.md#mytypegetinstances) on the returned constructor to get a fresh array of the records it has created, in registration order.
+
+<!-- prettier-ignore -->
+```javascript
+import { defineType } from "go-constant";
+
+const Priority = defineType("Priority", ["code", "rank"], {
+  trackInstances: true
+});
+
+Priority("normal", 20);
+Priority("urgent", 30);
+
+const codes = Priority.getInstances()
+  .sort((a, b) => b.rank - a.rank)
+  .map(priority => priority.code);
+
+codes;   // => ["urgent", "normal"]
+```
+
+## API summary
+
+See the **[full API documentation](docs/API.md)** for parameters, return values, errors and examples.
+
+{{API_SUMMARY}}
+
+## Behaviour
+
+### Create wrappers and reusable records
+
+- Declared fields are enumerable, non-writable and non-configurable. New instances are extensible, and nested values retain their original mutability. Strict-mode assignment to a protected field throws; outside strict mode it is ignored.
+- A factory call with exactly one instance of its own type reuses that object. Construction with `new` always creates a fresh wrapper or record. Separate package copies have separate identities.
+- Validators run synchronously before field creation. Return an array to normalise arguments or `undefined` to keep them; errors propagate and promises are unsupported. Only own, supported configuration keys are accepted.
+- Coercion is opt-in for generated types. No automatic `toString`, `toJSON` or `Symbol.toPrimitive` is installed. A declared [`valueOf`](docs/API.md#a-data-field-named-valueof) data field cannot be combined with a non-null coercion option.
+
+### Read tracked instances
+
+Tracking is disabled by default. [`getInstances()`](docs/API.md#mytypegetinstances) throws `Error` on types with tracking disabled. Enable [`trackInstances`](docs/API.md#definetypename-fields-options) when defining the type to collect instances. An enabled registry with no records returns an empty array. A tracking type retains references to its registered records for as long as the type is reachable.
+
+### Choose a fixed set
+
+Use [`defineEnum()`](docs/API.md#defineenumdefinitions-name) when the values are known at definition time. Use [`defineType()`](docs/API.md#definetypename-fields-options) when callers need to construct records as they go.
+
+The enum, its members and its [`members`](docs/API.md#myenummembers) array are shallowly frozen. The factory copies top-level fields without modifying or freezing the input definitions. Nested metadata is shared and retains its original mutability. Duplicate values throw. Lookup compares stored values exactly, so `0` and `"0"` are distinct.
+
+The top-level key `name` is reserved for the enum's read-only, non-enumerable name. An unnamed enum has [`.name`](docs/API.md#myenumname) set to `null`. Members can still use `name` as metadata or `"name"` as a stored value.
+
+See the [full behavioural contracts](docs/API.md#behaviour) for named inputs, validation, instance identity, lookup policies and symbol fields.
+
+## TypeScript
+
+TypeScript declarations are included; no separate `@types` package is required.
+
+Derive the member and value types from the enum. [`fromValue()`](docs/API.md#myenumfromvalueinput) accepts `unknown` and returns a member or `undefined`. A literal input narrows the possible member types, including their metadata. [`hasValue()`](docs/API.md#myenumhasvalueinput) returns `boolean`.
+
+<!-- prettier-ignore -->
+```typescript
+import { defineEnum } from "go-constant";
+
+const Status = defineEnum({ DRAFT: "draft", PUBLISHED: { value: "published", label: "Published" } });
+type StatusMember = (typeof Status.members)[number];
+type StatusValue = StatusMember["value"];
+
+function readStatusValue(input: unknown): StatusValue | undefined {
+  return Status.fromValue(input)?.value;
+}
+
+console.log(readStatusValue("published"));           // => "published"
+console.log(Status.fromValue("published")?.label);   // => "Published"
+```
+
+Declarations require TypeScript 5.4 or newer. Annotate validator inputs and return a typed tuple, or supply explicit key/value tuples, to infer record field types. Unspecified field values default to `unknown`.
+
+TypeScript checks the arguments a [generated constructor](docs/API.md#mytypeargs) accepts. Passing an existing record back to that constructor can work at runtime and still fail type checking if the record’s shape differs from the expected arguments. See the [TypeScript examples and limitations](docs/API.md#typescript) for named inputs, validation-only hooks, coercion and optional configuration.
+
+## Performance
+
+Each construction defines one protected property per declared field. Values are stored by reference, so nested objects are not cloned. Validation adds the cost of the callback you supply.
+
+Tracking keeps a strong reference to each registered record while its type remains reachable. Each [`getInstances()`](docs/API.md#mytypegetinstances) call allocates and copies a shallow array, so snapshot cost grows with the number of tracked records. Use tracking for bounded definition sets; see the [construction and registration rules](docs/API.md#mytypeargs) for the registration boundary.
+
+See the [benchmark guide](https://github.com/fishgoldworks/go-constant/blob/master/benchmarks/README.md) for reproducible comparisons and the [historical performance report](https://github.com/fishgoldworks/go-constant/blob/master/docs/performance.md) for the measurements behind the built-in wrapper optimisation. Benchmark timings are not correctness gates.
+
+## Migration
+
+Key changes when upgrading to version 2.0:
+
+- Rename [`newType()`](docs/migration.md#rename-the-record-type-factory) calls and imports to [`defineType()`](docs/API.md#definetypename-fields-options).
+- Rename the [`saveInstances`](docs/migration.md#replace-mutable-registry-access-with-snapshots) option to [`trackInstances`](docs/API.md#definetypename-fields-options).
+- For tracked types, replace [`MyType.instances`](docs/migration.md#replace-mutable-registry-access-with-snapshots) with [`MyType.getInstances()`](docs/API.md#mytypegetinstances), which returns a fresh snapshot.
+- Review [type configuration](docs/migration.md#capture-valid-configuration-when-defining-a-type), which is now validated and captured when the type is defined.
+- Account for the included declarations, which require TypeScript 5.4 or newer. See the [TypeScript upgrade guidance](docs/migration.md#use-public-imports-and-included-declarations).
+- Replace internal deep imports with [supported public entry points](docs/migration.md#use-public-imports-and-included-declarations).
+- Replace the browser and worker global [`Constant`](docs/API.md#constantvalue-name) with [`goConstant`](docs/API.md#constantvalue-name).
+
+See the [1.x migration guide](docs/migration.md) for the complete changes and upgrade examples.
+
+## Development
+
+Development uses npm on Node.js 22.16.0 or later within Node 22, or Node.js 24 or later. It uses TypeScript {{TYPESCRIPT}}. See [Runtime support](#runtime-support) for consumer requirements.
+
+```sh
+npm ci
+npm run build
+npm test
+```
+
+Edit `scripts/README.template.md` and `scripts/API.template.md`. `npm run build` regenerates `README.md` and `docs/API.md`, then assembles the consumer package under `package/`, including the browser bundles in `package/dist/`. Use `npm run docs` for documentation-only updates and `npm run pack:package` to create a local candidate.
+
+Run `npm run verify -- --node /path/to/node-8.0.0` with an exact Node.js 8.0.0 consumer executable. The gate checks documentation, source coverage, declarations, build recovery, distribution artefacts, tooling and installed-package consumers. `npm run verify:all -- --node /path/to/node-8.0.0` adds Chromium, Firefox and WebKit checks against that same packed candidate. Install the test browsers once with `npx --no-install playwright install chromium firefox webkit` after `npm ci`; see the development guide for platform setup.
+
+See the [development guide](https://github.com/fishgoldworks/go-constant/blob/master/CONTRIBUTING.md) for release candidates, local installation, build recovery and check responsibilities. The coverage badge reports executable source-line coverage; the docs badge reports checked public API reference coverage. Neither guarantees correctness for every input.
+
+## Further reading
+
+- [Full API documentation](docs/API.md)
+- [Development guide](https://github.com/fishgoldworks/go-constant/blob/master/CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
+- [Test coverage guide](https://github.com/fishgoldworks/go-constant/blob/master/docs/test-coverage.md)
+- [Historical performance report](https://github.com/fishgoldworks/go-constant/blob/master/docs/performance.md)
+
+## Licence
+
+Licensed under the [MIT licence](LICENSE.md).

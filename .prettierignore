@@ -1,0 +1,33 @@
+# Dependencies and package-manager state
+node_modules/
+
+# Generated distributions and documentation
+/README.md
+/artifacts/
+/docs/API.md
+/package/
+
+# Build staging and temporary files
+.tmp/
+/.package-*/
+/test/.type-runtime-*/
+/test/types/.readme-*/
+temp/
+
+# Coverage and local test results
+/coverage/
+
+# Lockfiles
+/package-lock.json
+
+# Historical records and third-party material
+/CHANGELOG.md
+/LICENSE.md
+/benchmarks/baseline/
+/docs/performance-history/
+/docs/performance.md
+
+# Editor and operating-system files
+.DS_Store
+/.idea/
+/nbproject/

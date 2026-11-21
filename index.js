@@ -1,1 +1,3 @@
-module.exports = require("./src/Constant");
+'use strict';
+
+module.exports = require('./src/Constant');

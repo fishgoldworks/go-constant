@@ -4,7 +4,8 @@ permissions:
   contents: read
 jobs:
   candidate:
-    runs-on: ubuntu-latest
+    # Use an Ubuntu image supported by the locked Playwright version.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     outputs:
       sha256: ${{ steps.archive.outputs.sha256 }}
